@@ -1,5 +1,8 @@
 import tkinter as tk 
 from tkinter import ttk
+# import pymysql
+import mysql.connector as myconn
+from tkinter import messagebox  
 
 class employee():
     def __init__(self, root ):
@@ -13,7 +16,18 @@ class employee():
                               font=("italic" ,40 , "bold"),bd=4, relief="groove")
         self.Label.pack(side = tk.TOP , fill="x")
 
-        # Creates Frame1 in left side :
+
+        #------Variables------
+        self.eid = tk.IntVar()
+        self.ename = tk.StringVar()
+        self.edesig = tk.StringVar()
+        self.esal = tk.IntVar() 
+        self.egender = tk.StringVar()
+        self.searchtype= tk.StringVar()
+        self.searchinp=tk.StringVar()
+        
+
+        #------ Creates Frame1 in left side------ :
         self.frame1= tk.Frame(self.root, bg="skyblue", bd=4, relief="ridge")
         self.frame1.place(x=10, y=80 ,width=370 ,height=550)
 
@@ -22,9 +36,9 @@ class employee():
                               bg="red", fg="White", font=("Arial",14,"bold"))
                        
         self.idLabel.grid(row=0, column=0 )
-
         #Creates Entry widgets in id label:
-        self.idInp= tk.Entry(self.frame1, font=("Arial, 14"), width=15)
+        self.idInp= tk.Entry(self.frame1, font=("Arial, 14"), width=15
+                             ,textvariable=self.eid) #variable
         self.idInp.grid(row=0, column=1 ,pady=10)
 
         #1Creates  Name Label in frame1:
@@ -34,7 +48,8 @@ class employee():
         self.NameLabel.grid(row=1, column=0 )
         
         #1Creates Entry widgets in Name label:
-        self.NameInp= tk.Entry(self.frame1, font=("Arial, 14"), width=15)
+        self.NameInp= tk.Entry(self.frame1, font=("Arial, 14"), width=15
+                               ,textvariable=self.ename) #variable 
         self.NameInp.grid(row=1, column=1 ,pady=10)
 
 
@@ -45,7 +60,8 @@ class employee():
         self.desigLabel.grid(row=2, column=0 )
         
         #2Creates Entry widgets in desig label:
-        self.desigInp= tk.Entry(self.frame1, font=("Arial, 14"), width=15)
+        self.desigInp= tk.Entry(self.frame1, font=("Arial, 14"), width=15
+                                ,textvariable=self.edesig) #variable
         self.desigInp.grid(row=2, column=1 ,pady=10)
 
 
@@ -56,7 +72,8 @@ class employee():
         self.salaryLabel.grid(row=3, column=0)
         
         #3Creates Entry widgets for salary label:
-        self.salaryInp= tk.Entry(self.frame1, font=("Arial, 14"), width=15)
+        self.salaryInp= tk.Entry(self.frame1, font=("Arial, 14"), width=15
+                                 ,textvariable=self.esal) #variable 
         self.salaryInp.grid(row=3, column=1 ,pady=10)
      
 
@@ -68,7 +85,9 @@ class employee():
         
         #4Creates combobox for choose Gender:- state is use for taking option.
         self.genInp= ttk.Combobox(self.frame1, font=("Arial",14)
-                                  ,width=13, state="readonly") 
+                                  ,width=13,state="readonly",
+                                  textvariable=self.egender) #variable
+         
         self.genInp['values']=("Male" , "Female","other")
         self.genInp.grid(row=4, column=1, pady=10)       
 
@@ -78,33 +97,38 @@ class employee():
 
         self.AddLabel.grid(row=5, column=0)
 
-        #5 Take input  in address field from user by text:
+        #5 Take input  in Address field from user by text:
         self.AddInp= tk.Text(self.frame1, width=15, height=3
                              ,font=("Arial",14), pady=10 )
-        self.AddInp.grid(row=5, column=1 ,pady=10)
+        self.AddInp.grid(row=5, column=1 ,pady=10) #not use variable 
 
         # ---Creates nested frame inside frame1----
         self.btnFrame=tk.Frame(self.frame1,bd=4, relief="raised")
         self.btnFrame.place(x=6, y=360 , width=350,height=170)
 
         # Creates Buttons Inside Nested Frame :
-        #1.ADD BUTTON
+        #1.ADD BUTTON : I also call add btn here.
         self.Addbtn=tk.Button(self.btnFrame, text="ADD",bg="red",fg="white",
-                              width=10, font=("Arial",14,"bold"))
+                              width=10, font=("Arial",14,"bold"),
+                              command=self.add) #call add btn.
         self.Addbtn.grid(row=0,column=0,padx=20, pady=20)
         #2.UPDATE BUTTON
-        self.updbtn= tk.Button(self.btnFrame,text="UPDATE" ,bg="red",fg="white"
-                           , font=("Arial",14,"bold"),width=10)
+        self.updbtn= tk.Button(self.btnFrame,text="UPDATE" , 
+                               command=self.update_1 # Call update btn
+                               ,bg="red",fg="white"
+                           , font=("Arial",14,"bold"),width=10) 
         self.updbtn.grid(row=0,column=1,padx=20,pady=20)
 
         #3.DELETE BUTTONS:
         self.delbtn=tk.Button(self.btnFrame,text="DELETE",bg="red",fg="white"
-                              ,font=("Arial",14,"bold"),width=10)
+                              ,font=("Arial",14,"bold"),width=10,
+                              command=self.remove) #Call Delete fun here. 
         self.delbtn.grid(row=1,column=0, padx=20,pady=20)
 
         #4.CLEAR BUTTON:
         self.clearbtn=tk.Button(self.btnFrame,text="CLEAR",bg="red",fg="white"
-                                      ,font=("Arial",14,"bold"),width=10)
+                                      ,font=("Arial",14,"bold"),width=10
+                                      ,command=self.clear) #Call clear btn.
         self.clearbtn.grid(row=1,column=1, padx=20,pady=20)
         
         
@@ -119,21 +143,25 @@ class employee():
 
         #Creates combobox in frame2:
         self.searchtype= ttk.Combobox(self.frame2, font=("arial",14),
-                                     width=15, state="readonly")
+                                     width=15, state="readonly"
+                                     ,textvariable=self.searchtype)
         self.searchtype['values']=("Id" ,"Name")
         self.searchtype.grid(row=0, column=1, padx=10,pady=10) 
 
-        self.searchinp=tk.Entry(self.frame2, font=("Arial",15),width=15)
+        self.searchinp=tk.Entry(self.frame2, font=("Arial",15),width=15
+                                ,textvariable=self.searchinp)
         self.searchinp.grid(row=0,column=2, pady=10)
 
         #Creates Buttons in frame2:
         self.searchbtn=tk.Button(self.frame2, text="Search",bg="red",fg="white",
-                                 font=("arial",13,"bold"),width=12)
+                                 font=("arial",13,"bold"),width=12
+                                 ,command=self.search) #Call search btn.
         self.searchbtn.grid(row=0, column=3,padx=5,pady=10)
 
        #Creates show Buttons in frame2:
         self.showbtn=tk.Button(self.frame2, text="Display All",bg="red",fg="white",
-                                       font=("arial",13,"bold"),width=12)
+                                       font=("arial",13,"bold"),width=12
+                                       ,command=self.show_all)# Call show button.
         self.showbtn.grid(row=0, column=4,padx=15,pady=10)
 
         #------Creates Table frame inside frame2-----
@@ -171,7 +199,140 @@ class employee():
         self.table.column("Addr",width=100)
        
         self.table.pack(fill="both", expand=1)
- 
+
+# Here define function for Clicking Add button:-Creates Connection with Db.
+    def add(self): #Call this fun inside ADD buttons.
+      try:
+        mydb=myconn.connect(host="localhost",
+                                user="root",
+                                password="Az12rqu3",
+                                database="emp_db")
+        db_cursor= mydb.cursor()
+        db_cursor.execute("insert into employee_project values(%s,%s,%s,%s,%s,%s)" 
+                          ,(self.eid.get(), self.ename.get(), self.edesig.get(),
+                           self.esal.get(), self.egender.get(),
+                           self.AddInp.get('1.0',tk.END)
+                         ))
+        mydb.commit()
+        # If data inserted successfully in DB then print this message:
+        tk.messagebox.showinfo("Success","Data Inserted Successfully...")
+        #Call the geyt_data function :
+        self.get_data()
+        mydb.close()
+
+      except Exception as e:
+         tk.messagebox.showinfo("Error", f"Error: {str(e)}")
+
+        #Call the geyt_data function :
+         self.get_data()
+      
+    #To Get Data in Table from Treeview widgets::
+    def get_data(self):
+       try:   
+         mydb= myconn.connect(host="localhost", user="root",
+                            password="Az12rqu3",database="emp_db")
+         db_cursor=mydb.cursor()
+         db_cursor.execute("select * from employee_project")
+         data = db_cursor.fetchall() 
+
+         if len(data) > 0:
+          self.table.delete(*self.table.get_children())
+          for i in data: # In 'i' first row allocated.
+             self.table.insert('',tk.END, values=i)
+        
+         mydb.close()     
+       except  Exception as e:
+            tk.messagebox.showinfo("Error", f"Error: {str(e)}")
+
+    #Creates Another function for active CLEAR Buttons:-
+    def clear(self):        #call it inside clear btn.
+       self.eid.set(0)
+       self.ename.set("")
+       self.edesig.set("")
+       self.esal.set(0)    
+       self.egender.set("")
+       self.AddInp.delete('1.0', tk.END) 
+
+    # Update buttons active:
+    def update_1(self):
+          try:
+            mydb= myconn.connect(host="localhost", user="root",
+                                   password="Az12rqu3",database="emp_db")
+            db_cursor=mydb.cursor()
+            db_cursor.execute("update employee_project set Emp_Name=%s, Desig=%s, Emp_salary=%s, Gender=%s,Emp_Addres=%s where id=%s",
+                          (self.ename.get(),
+                          self.edesig.get(),
+                          self.esal.get(), 
+                          self.egender.get(),
+                          self.AddInp.get('1.0', tk.END),
+                          self.eid.get()))
+            mydb.commit()
+            tk.messagebox.showinfo("SUCCESS", "DATA UPDATED SUCCESSFULLY.\n Thank You")
+            self.get_data() # To get data from treeview widgets.
+            mydb.close()
+
+          except  Exception as e:
+            tk.messagebox.showinfo("Error", f"Error: {str(e)}")
+
+    # Here define Delete Function fo data deleting.  
+    def remove(self):
+      try:
+        mydb = myconn.connect(host="localhost", user="root",
+                            password="Az12rqu3", database="emp_db")
+        db_cursor = mydb.cursor()   
+        db_cursor.execute("delete from employee_project where id =%s", (self.eid.get(),))
+        mydb.commit()
+        tk.messagebox.showinfo("Success","Data Have been delete successfully. \n Thank You")
+        self.get_data()
+        mydb.close()
+
+      except  Exception as e:
+         tk.messagebox.showinfo("Error", f"Error: {str(e)}")
+
+    # Now Active Search by Buttons:
+    def search (self):
+      try:
+        mydb = myconn.connect(host="localhost", user="root",
+                                   password="Az12rqu3", database="emp_db")
+        db_cursor = mydb.cursor()
+        db_cursor.execute("select * from employee_project where " 
+                          +self.searchtype.get() + "=%s",(self.searchinp.get(),))
+        #get value from combobox by searchtype.get and searchinp.
+        rows= db_cursor.fetchall()
+        if len(rows) >0:
+           self.table.delete(*self.table.get_children())
+           for j in rows:
+              self.table.insert('',tk.END, values=j)
+        else:
+          tk.messagebox.showinfo("Error","Data not found")      
+        mydb.commit()
+        mydb.close() 
+             
+      except Exception as e:
+          tk.messagebox.showinfo("Error", f"Error: {str(e)}")
+      
+    #Define fun for Display_All :
+    def show_all(self):
+      try:   
+        mydb= myconn.connect(host="localhost", user="root",
+                                   password="Az12rqu3",database="emp_db")
+        db_cursor=mydb.cursor()
+        db_cursor.execute("select * from employee_project")
+        data = db_cursor.fetchall() 
+       
+        if len(data) > 0:
+          self.table.delete(*self.table.get_children())
+          for i in data: # In 'i' first row allocated.
+           self.table.insert('',tk.END, values=i)
+        else:
+                 tk.messagebox.showinfo("Error","Data not found")       
+        mydb.close()     
+      except  Exception as e:
+          tk.messagebox.showinfo("Error", f"Error: {str(e)}") 
+                  
+        
+            
+            
 root = tk.Tk()
 obj = employee(root) # creates obj for cons.
 root.mainloop()    
